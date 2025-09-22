@@ -171,12 +171,18 @@
     replace: "{{ cs_ban_duration }}"
     backup: yes
 
-- name: crowdsec - add jounalctl ssh to acquis.yaml
+- name: CrowdSec | check if acquis.yaml exists
+  stat:
+    path: /etc/crowdsec/acquis.yaml
+  register: __acquis_stat
+
+- name: crowdsec - add jounalctl ssh to acquis.yaml (skip in new versions when the file doesn't exist)
   blockinfile:
     path: /etc/crowdsec/acquis.yaml
     insertafter: EOF
     block: "{{ cs_acquis_addon }}"
     backup: yes
+  when: __acquis_stat.stat.exists
 
 - name: crowdsec - cscli bash completion
   ansible.builtin.shell: "cscli completion bash | sudo tee /etc/bash_completion.d/cscli"
